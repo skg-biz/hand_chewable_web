@@ -3,6 +3,7 @@ import { applyTorque, rpm, step, type SpinnerState } from "./physics";
 import { usePointer } from "../../shared/input/usePointer";
 import { useApp } from "../../shared/store";
 
+
 interface Props {
   state: SpinnerState;
   onRpm: (rpm: number) => void;
@@ -13,6 +14,8 @@ export default function SpinnerCanvas({ state, onRpm }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const lowSpec = useApp((s) => s.lowSpec);
   const reducedMotion = useApp((s) => s.reducedMotion);
+  const onRpmRef = useRef(onRpm);
+  useEffect(() => { onRpmRef.current = onRpm; });
 
   usePointer(canvasRef, {
     onMove: (e) => {
@@ -67,7 +70,7 @@ export default function SpinnerCanvas({ state, onRpm }: Props) {
       const dt = Math.min(0.05, (now - lastT) / 1000);
       lastT = now;
       step(state, dt);
-      onRpm(rpm(state));
+      onRpmRef.current(rpm(state));
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       const w = canvas.width / dpr;
@@ -115,7 +118,9 @@ export default function SpinnerCanvas({ state, onRpm }: Props) {
       ro.disconnect();
       window.removeEventListener("keydown", onKey);
     };
-  }, [state, onRpm, lowSpec, reducedMotion]);
+  // onRpm excluded from deps — stable via onRpmRef
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, lowSpec, reducedMotion]);
 
   return (
     <div ref={wrapRef} className="canvas-wrap" style={{ aspectRatio: "1 / 1", maxWidth: 540 }}>

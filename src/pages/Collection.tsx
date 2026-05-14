@@ -14,7 +14,10 @@ const ALL_ACHIEVEMENTS = [
   { id: "first-wakppu", emoji: "🎵", name: "첫 누름", desc: "왁뿌 1번 누르기" },
   { id: "simon-10", emoji: "🧠", name: "기억력 천재", desc: "사이먼 10단계" },
   { id: "pixel-art", emoji: "🎨", name: "픽셀 아티스트", desc: "픽셀 아트 저장" },
-  { id: "grand-slam", emoji: "🏆", name: "그랜드 슬램", desc: "오늘 4게임 모두 플레이" },
+  { id: "first-keycap", emoji: "⌨️", name: "첫 키캡", desc: "키캡을 한 번 눌러보기" },
+  { id: "keycap-saved", emoji: "💾", name: "내 빌드", desc: "디자인을 저장" },
+  { id: "keycap-row", emoji: "🎹", name: "키캡 컬렉터", desc: "한 줄에 5개 이상 배치" },
+  { id: "grand-slam", emoji: "🏆", name: "그랜드 슬램", desc: "오늘 5게임 모두 플레이" },
   { id: "konami", emoji: "🎮", name: "이스터에그", desc: "??? 코드를 입력하세요" },
 ];
 

@@ -33,6 +33,11 @@ export default function PopPage({ embed }: Props) {
   const [bpm, setBpm] = useState(110);
   const lastPopAt = useRef(0);
   const { bumpStat, unlock, nickname } = useApp();
+  const scoreRef = useRef(score);
+  const nicknameRef = useRef(nickname);
+
+  useEffect(() => { scoreRef.current = score; }, [score]);
+  useEffect(() => { nicknameRef.current = nickname; }, [nickname]);
 
   useEffect(() => {
     setGrid(createGrid(cols, rows, shape));
@@ -41,21 +46,22 @@ export default function PopPage({ embed }: Props) {
     setHighlight(-1);
   }, [cols, rows, shape]);
 
-  // Timer
+  // Timer — score/nickname excluded from deps intentionally; refs keep fresh values
   useEffect(() => {
     if (mode !== "timeattack" || !running) return;
     const id = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {
           setRunning(false);
-          void submitScore({ game: "pop", mode: "timeattack", score, nickname });
+          void submitScore({ game: "pop", mode: "timeattack", score: scoreRef.current, nickname: nicknameRef.current });
           return 0;
         }
         return t - 1;
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [mode, running, score, nickname]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, running]);
 
   // Rhythm beat
   useEffect(() => {

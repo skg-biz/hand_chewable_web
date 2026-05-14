@@ -131,7 +131,7 @@ export default function WakppuCanvas({ state, highlight = -1, cellColor, onPress
 
   return (
     <div ref={wrapRef} className="canvas-wrap" style={{ aspectRatio: "1 / 1", maxWidth: 560 }}>
-      <canvas ref={canvasRef} aria-label="왁뿌 그리드" tabIndex={0} />
+      <canvas ref={canvasRef} aria-label="팝잇 그리드" tabIndex={0} />
     </div>
   );
 }

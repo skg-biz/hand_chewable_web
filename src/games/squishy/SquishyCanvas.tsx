@@ -15,6 +15,10 @@ export default function SquishyCanvas({ kind, onDeform, onBurst }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const lowSpec = useApp((s) => s.lowSpec);
+  const onDeformRef = useRef(onDeform);
+  const onBurstRef = useRef(onBurst);
+  useEffect(() => { onDeformRef.current = onDeform; });
+  useEffect(() => { onBurstRef.current = onBurst; });
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -93,7 +97,7 @@ export default function SquishyCanvas({ kind, onDeform, onBurst }: Props) {
       const c = Matter.Constraint.create({ pointA: { x, y }, bodyB: target, pointB: { x: 0, y: 0 }, stiffness: 0.3, damping: 0.1 });
       Matter.World.add(world, c);
       grabbing.set(e.pointerId, { body: target, constraint: c });
-      onDeform();
+      onDeformRef.current();
       playClick();
       haptic(8);
     };
@@ -131,7 +135,7 @@ export default function SquishyCanvas({ kind, onDeform, onBurst }: Props) {
         burstAt = now;
         playPop({ detune: -200 });
         haptic([20, 40, 20]);
-        onBurst();
+        onBurstRef.current();
         // release all grabs
         for (const [id, g] of grabbing) { Matter.World.remove(world, g.constraint); grabbing.delete(id); }
         // explode outward, then reform
@@ -211,7 +215,9 @@ export default function SquishyCanvas({ kind, onDeform, onBurst }: Props) {
       Matter.World.clear(world, false);
       Matter.Engine.clear(engine);
     };
-  }, [kind, lowSpec, onDeform, onBurst]);
+  // onDeform/onBurst excluded from deps — stable via refs
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kind, lowSpec]);
 
   return (
     <div ref={wrapRef} className="canvas-wrap" style={{ aspectRatio: "1 / 1", maxWidth: 540 }}>

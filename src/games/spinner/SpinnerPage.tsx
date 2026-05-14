@@ -16,6 +16,7 @@ export default function SpinnerPage({ embed }: Props) {
   const [, setTick] = useState(0);
   const force = () => setTick((n) => n + 1);
   const [rpmDisplay, setRpmDisplay] = useState(0);
+  const rpmDisplayRef = useRef(0);
   const [maxRpm, setMaxRpm] = useState(0);
   const [gyroEnabled, setGyroEnabled] = useState(false);
   const gyro = useGyro(gyroEnabled);
@@ -29,10 +30,13 @@ export default function SpinnerPage({ embed }: Props) {
     }
   }, [gyro, gyroEnabled]);
 
+  // rpmDisplay를 ref로도 동기화해 RAF 루프가 매 프레임 재시작되지 않도록 함
+  useEffect(() => { rpmDisplayRef.current = rpmDisplay; }, [rpmDisplay]);
+
   useEffect(() => {
     let raf = 0;
     const tick = () => {
-      const r = rpmDisplay;
+      const r = rpmDisplayRef.current; // ref에서 최신 RPM 읽기
       // bump global RPM at most every 500ms
       const now = performance.now();
       if (now - lastBumpAt.current > 500 && r > 60) {
@@ -44,7 +48,9 @@ export default function SpinnerPage({ embed }: Props) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [rpmDisplay, bumpStat]);
+  // rpmDisplay 제거 — ref로 최신값을 읽으므로 deps 불필요
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bumpStat]);
 
   const onRpm = (r: number) => {
     setRpmDisplay(r);

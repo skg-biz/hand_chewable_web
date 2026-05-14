@@ -10,6 +10,7 @@ import PopPage from "./games/pop/PopPage";
 import SpinnerPage from "./games/spinner/SpinnerPage";
 import SquishyPage from "./games/squishy/SquishyPage";
 import WakppuPage from "./games/wakppu/WakppuPage";
+import KeycapPage from "./games/keycap/KeycapPage";
 import EmbedPage from "./pages/Embed";
 import { useEasterEggs, checkGrandSlam } from "./shared/easter";
 
@@ -81,6 +82,7 @@ export default function App() {
                   <Route path="/spinner" element={<SpinnerPage />} />
                   <Route path="/squishy" element={<SquishyPage />} />
                   <Route path="/wakppu" element={<WakppuPage />} />
+                  <Route path="/keycap" element={<KeycapPage />} />
                   <Route path="/daily" element={<Daily />} />
                   <Route path="/collection" element={<Collection />} />
                   <Route path="/settings" element={<Settings />} />

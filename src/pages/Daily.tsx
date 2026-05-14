@@ -25,11 +25,12 @@ function rand(seed: number) {
 export default function Daily() {
   const { stats } = useApp();
   const r = rand(todaySeed());
+  const popTarget = 100 + Math.floor(r() * 200); // r() 한 번만 호출해 title과 target 동일 보장
   const missions: Mission[] = [
-    { id: "pop", emoji: "🫧", title: `뽁뽁 ${100 + Math.floor(r() * 200)}칸`, target: 100 + Math.floor(rand(todaySeed())() * 200), current: stats.popTotal, game: "/pop" },
+    { id: "pop", emoji: "🫧", title: `뽁뽁 ${popTarget}칸`, target: popTarget, current: stats.popTotal, game: "/pop" },
     { id: "spin", emoji: "🌀", title: `누적 RPM 5,000`, target: 5000, current: stats.spinRpmTotal, game: "/spinner" },
     { id: "squishy", emoji: "🍑", title: `말랑이 30회 변형`, target: 30, current: stats.squishyDeforms, game: "/squishy" },
-    { id: "wakppu", emoji: "🎵", title: `왁뿌 50회 누르기`, target: 50, current: stats.wakppuPresses, game: "/wakppu" },
+    { id: "wakppu", emoji: "🎵", title: `팝잇 50회 누르기`, target: 50, current: stats.wakppuPresses, game: "/wakppu" },
   ];
   return (
     <div className="page">

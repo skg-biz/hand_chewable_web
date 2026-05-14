@@ -26,15 +26,40 @@ export default function WakppuPage({ embed }: Props) {
 
   useEffect(() => { setState(createBoard(size)); colorByIdxRef.current = new Map(); }, [size]);
 
-  // Keyboard
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const idx = keyToIndex(e.key, size);
-      if (idx != null) doPress(idx);
+  // Simon 시퀀스 타이머 추적 — 모드 변경 시 정리
+  const simonTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const clearSimonTimers = () => {
+    simonTimersRef.current.forEach(clearTimeout);
+    simonTimersRef.current = [];
+  };
+
+  const extendSimon = useCallback(() => {
+    const next = [...simonSeq, Math.floor(Math.random() * size * size)];
+    setSimonSeq(next);
+    setSimonStage("watch");
+    setSimonStep(0);
+    let i = 0;
+    const tick = () => {
+      if (i >= next.length) {
+        setSimonHighlight(-1);
+        setSimonStage("input");
+        return;
+      }
+      setSimonHighlight(next[i]);
+      playNote(SCALE_MAJOR_C[next[i] % SCALE_MAJOR_C.length], 0.4, "sine");
+      i++;
+      simonTimersRef.current.push(
+        setTimeout(() => {
+          setSimonHighlight(-1);
+          simonTimersRef.current.push(setTimeout(tick, 200));
+        }, 450)
+      );
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  });
+    simonTimersRef.current.push(setTimeout(tick, 600));
+  }, [simonSeq, size]);
+
+  // 모드 변경 시 진행 중인 Simon 타이머 정리
+  useEffect(() => { clearSimonTimers(); }, [mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const doPress = useCallback((idx: number) => {
     const wave = mode === "wave";
@@ -59,7 +84,7 @@ export default function WakppuPage({ embed }: Props) {
         const next = simonStep + 1;
         if (next === simonSeq.length) {
           if (simonSeq.length >= 10) unlock("simon-10");
-          setTimeout(() => extendSimon(), 600);
+          simonTimersRef.current.push(setTimeout(() => extendSimon(), 600));
           setSimonStep(0);
         } else {
           setSimonStep(next);
@@ -68,32 +93,23 @@ export default function WakppuPage({ embed }: Props) {
         setSimonStage("lost");
       }
     }
-  }, [mode, state, bumpStat, unlock, pixelColor, simonStage, simonSeq, simonStep]);
+  }, [mode, state, bumpStat, unlock, pixelColor, simonStage, simonSeq, simonStep, extendSimon]);
 
-  const extendSimon = useCallback(() => {
-    const next = [...simonSeq, Math.floor(Math.random() * size * size)];
-    setSimonSeq(next);
-    setSimonStage("watch");
-    setSimonStep(0);
-    let i = 0;
-    const tick = () => {
-      if (i >= next.length) {
-        setSimonHighlight(-1);
-        setSimonStage("input");
-        return;
-      }
-      setSimonHighlight(next[i]);
-      playNote(SCALE_MAJOR_C[next[i] % SCALE_MAJOR_C.length], 0.4, "sine");
-      i++;
-      setTimeout(() => { setSimonHighlight(-1); setTimeout(tick, 200); }, 450);
+  // Keyboard — doPress 아래로 이동해 최신 클로저 참조 보장
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const idx = keyToIndex(e.key, size);
+      if (idx != null) doPress(idx);
     };
-    setTimeout(tick, 600);
-  }, [simonSeq, size]);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [doPress, size]);
 
   const startSimon = () => {
+    clearSimonTimers();
     setSimonSeq([]);
     setSimonStage("idle");
-    setTimeout(() => extendSimon(), 200);
+    simonTimersRef.current.push(setTimeout(() => extendSimon(), 200));
   };
 
   const cellColor = useCallback((idx: number) => {
@@ -175,7 +191,7 @@ export default function WakppuPage({ embed }: Props) {
         </>
       )}
       <WakppuCanvas state={state} highlight={simonHighlight} cellColor={cellColor} onPress={doPress} />
-      {!embed && <p style={{ color: "var(--charcoal-soft)", fontSize: "0.85rem" }}>키보드: 1234/QWER/ASDF/ZXCV (4×4) · 사이먼 모드는 패턴을 따라하세요</p>}
+      {!embed && <p style={{ color: "var(--charcoal-soft)", fontSize: "0.85rem" }}>키보드: 1234/QWER/ASDF/ZXCV (4×4) · 사이먼 모드는 패턴을 따라하세요 · 팝잇처럼 눌러보세요</p>}
     </div>
   );
 }
